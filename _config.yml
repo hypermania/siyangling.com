@@ -82,12 +82,12 @@ analytics:
 author:
   name             : "Siyang Ling"
   avatar           : "profile.png"
-  bio              : "Ph.D. student in theoretical physics"
-  location         : "Houston"
+  bio              : "PhD student in theoretical physics"
+  location         : "Houston, TX"
   employer         :
   pubmed           : "https://www.ncbi.nlm.nih.gov/pubmed/?term=john+snow"
   googlescholar    : "http://yourfullgooglescholarurl.com"
-  email            : "mailto:sl135@rice.edu"
+  email            : "sl135@rice.edu"
   researchgate     :  # example: "https://www.researchgate.net/profile/yourprofile"
   uri              :
   bitbucket        :
@@ -102,7 +102,7 @@ author:
   instagram        :
   impactstory      : #"https://profiles.impactstory.org/u/xxxx-xxxx-xxxx-xxxx"
   lastfm           :
-  linkedin         :
+  linkedin         : "https://www.linkedin.com/in/siyang-ling-469787119"
   orcid            : "https://orcid.org/0000-0002-3801-1747"
   pinterest        :
   soundcloud       :
