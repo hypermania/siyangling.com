@@ -135,20 +135,24 @@ for pubsource in publist:
                     md += "\npaperurl: '" + b["url"] + "'"
                     url = True
 
-            md += "\ncitation: '" + html_escape(citation) + "'"
+            # Don't need to tell other people how to cite
+            #md += "\ncitation: '" + html_escape(citation) + "'"
 
             md += "\n---"
 
             
             ## Markdown description for individual page
+            md += "\n[arXiv link](https://arxiv.org/abs/" + html_escape(b["eprint"]) + ")\n"
+
+            """
             if note:
                 md += "\n" + html_escape(b["note"]) + "\n"
-
             if url:
                 md += "\n[Access paper here](" + b["url"] + "){:target=\"_blank\"}\n" 
             else:
                 md += "\nUse [Google Scholar](https://scholar.google.com/scholar?q="+html.escape(clean_title.replace("-","+"))+"){:target=\"_blank\"} for full citation"
-
+            """
+            
             md_filename = os.path.basename(md_filename)
 
             with open("../_publications/" + md_filename, 'w') as f:
