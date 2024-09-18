@@ -82,12 +82,12 @@ analytics:
 author:
   name             : "Siyang Ling"
   avatar           : "profile.jpg"
-  bio              : "PhD student in theoretical physics"
-  location         : "Houston, TX"
-  employer         : "Rice University"
+  bio              : "Postdoc in theoretical physics"
+  location         : "Hong Kong"
+  employer         : "City University of Hong Kong"
   pubmed           : #"https://www.ncbi.nlm.nih.gov/pubmed/?term=john+snow"
   googlescholar    : #"http://yourfullgooglescholarurl.com"
-  email            : "sl135@rice.edu"
+  email            : "lingsy.chris2011@gmail.com"
   researchgate     :  # example: "https://www.researchgate.net/profile/yourprofile"
   uri              :
   bitbucket        :
