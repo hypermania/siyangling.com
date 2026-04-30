@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="700" viewBox="0 0 1100 700" role="img" aria-labelledby="title desc">
+  <title id="title">CUDA Graph structure for CudaTeukolskyScalarPDE</title>
+  <desc id="desc">A schematic directed acyclic graph showing the main linear Teukolsky graph, the optional nonlinear graph, the graph executable cache, and the source term that remains outside the CUDA graph.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#34495e"/>
+    </marker>
+    <style>
+      .bg { fill: #f7fafc; }
+      .panel { fill: #ffffff; stroke: #9fb3c8; stroke-width: 2; rx: 14; }
+      .node { fill: #e7f0f7; stroke: #52758f; stroke-width: 2; rx: 12; }
+      .node2 { fill: #edf7ec; stroke: #5f8a62; stroke-width: 2; rx: 12; }
+      .node3 { fill: #fff4df; stroke: #b68435; stroke-width: 2; rx: 12; }
+      .host { fill: #f1e9f7; stroke: #7f6694; stroke-width: 2; rx: 12; }
+      .outside { fill: #f9ecec; stroke: #a66565; stroke-width: 2; rx: 12; }
+      .label { font-family: Arial, sans-serif; font-size: 18px; fill: #1f2933; font-weight: 700; }
+      .text { font-family: Arial, sans-serif; font-size: 15px; fill: #1f2933; }
+      .small { font-family: Arial, sans-serif; font-size: 13px; fill: #52606d; }
+      .edge { fill: none; stroke: #34495e; stroke-width: 2.2; marker-end: url(#arrow); }
+      .edge2 { fill: none; stroke: #6b7c93; stroke-width: 2; stroke-dasharray: 6 5; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1100" height="700"/>
+
+  <text class="label" x="48" y="42">Schematic CUDA graph used by <tspan font-family="monospace">CudaTeukolskyScalarPDE::operator()</tspan></text>
+  <text class="small" x="48" y="66">Each box represents one group of CUDA graph nodes. The actual graph has one derivative and assembly node per harmonic mode.</text>
+
+  <rect class="panel" x="35" y="95" width="1028" height="320"/>
+  <text class="label" x="58" y="130">Main linear Teukolsky graph</text>
+
+  <rect class="host" x="65" y="170" width="170" height="82"/>
+  <text class="text" x="88" y="198">State buffers</text>
+  <text class="small" x="86" y="222">x = [psi_lm, dt psi_lm]</text>
+  <text class="small" x="86" y="241">dxdt output buffer</text>
+
+  <rect class="node" x="292" y="150" width="190" height="74"/>
+  <text class="text" x="322" y="178">drdr kernels</text>
+  <text class="small" x="319" y="202">one per harmonic mode</text>
+
+  <rect class="node" x="292" y="250" width="190" height="74"/>
+  <text class="text" x="332" y="278">dr kernels</text>
+  <text class="small" x="319" y="302">one per harmonic mode</text>
+
+  <rect class="node3" x="540" y="200" width="150" height="74"/>
+  <text class="text" x="571" y="228">Barrier</text>
+  <text class="small" x="563" y="252">empty graph node</text>
+
+  <rect class="node" x="750" y="178" width="220" height="90"/>
+  <text class="text" x="786" y="207">dtdt assembly</text>
+  <text class="small" x="775" y="231">coupling maps select</text>
+  <text class="small" x="775" y="250">kernel by num_terms</text>
+
+  <rect class="node" x="750" y="302" width="220" height="74"/>
+  <text class="text" x="786" y="330">Copy or KO+copy</text>
+  <text class="small" x="779" y="354">fills first half of dxdt</text>
+
+  <path class="edge" d="M 235 205 C 255 196, 266 190, 292 187"/>
+  <path class="edge" d="M 235 224 C 258 249, 268 277, 292 287"/>
+  <path class="edge" d="M 482 187 C 505 195, 519 207, 540 222"/>
+  <path class="edge" d="M 482 287 C 510 276, 523 263, 540 250"/>
+  <path class="edge" d="M 690 237 C 710 232, 726 228, 750 223"/>
+  <path class="edge" d="M 235 235 C 470 386, 594 376, 750 345"/>
+  <path class="edge" d="M 970 224 C 1005 238, 1016 267, 1008 300 C 997 342, 987 359, 970 366"/>
+  <path class="edge" d="M 970 340 C 1010 330, 1017 281, 970 250"/>
+
+  <rect class="panel" x="35" y="450" width="705" height="200"/>
+  <text class="label" x="58" y="485">Optional nonlinear graph when lambda != 0</text>
+
+  <rect class="node2" x="70" y="522" width="190" height="74"/>
+  <text class="text" x="109" y="550">phi * phi</text>
+  <text class="small" x="96" y="574">writes psi_sqr_lm</text>
+
+  <rect class="node3" x="318" y="522" width="140" height="74"/>
+  <text class="text" x="346" y="550">Barrier</text>
+  <text class="small" x="342" y="574">after products</text>
+
+  <rect class="node2" x="520" y="510" width="190" height="98"/>
+  <text class="text" x="550" y="539">lambda coeffs</text>
+  <text class="text" x="560" y="560">times phi^2</text>
+  <text class="small" x="548" y="584">accumulates into dxdt</text>
+
+  <path class="edge" d="M 260 559 L 318 559"/>
+  <path class="edge" d="M 458 559 L 520 559"/>
+
+  <rect class="host" x="790" y="470" width="240" height="82"/>
+  <text class="text" x="824" y="498">Graph executable cache</text>
+  <text class="small" x="820" y="522">key = (x pointer, dxdt pointer)</text>
+  <text class="small" x="820" y="541">stores cudaGraphExec_t</text>
+
+  <rect class="outside" x="790" y="585" width="240" height="62"/>
+  <text class="text" x="830" y="613">Source term</text>
+  <text class="small" x="820" y="635">runs after graph launch if present</text>
+
+  <path class="edge2" d="M 910 470 C 855 407, 830 335, 858 268"/>
+  <path class="edge2" d="M 910 552 C 870 585, 812 590, 710 575"/>
+  <path class="edge2" d="M 910 585 C 910 560, 910 552, 910 552"/>
+
+  <text class="small" x="55" y="676">Main graph: derivative nodes -> barrier -> linear RHS assembly, plus copy/KO copy. Nonlinear graph: phi^2 products -> barrier -> lambda contribution.</text>
+</svg>

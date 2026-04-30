@@ -14,6 +14,17 @@ The CUDA Graph support in `hypermania/BlackholePerturbations` is centered on the
 
 The key observation is that the solver evaluates the same right-hand-side structure many times. The field values change from call to call, but the dependency graph among kernels does not. CUDA Graph therefore fits the workload well: the code builds the launch DAG once, instantiates it as an executable graph, and reuses it whenever Odeint asks for another RHS evaluation.
 
+Physics setting
+======
+
+The part of the code discussed here was written for the Kerr black hole calculations in [arXiv:2603.20379](https://arxiv.org/abs/2603.20379), "Nonlinear tails in the Kerr black hole ringdown". The broader `BlackholePerturbations` repository also contains the Schwarzschild calculations used in [arXiv:2503.19967](https://arxiv.org/abs/2503.19967), "Dynamical nonlinear tails in Schwarzschild black hole ringdown".
+
+The physical question is the late-time behavior of black hole perturbations. After a compact disturbance, the waveform first contains the familiar quasinormal ringing of the black hole. At sufficiently late times, however, the signal is controlled by power-law tails. Linear perturbation theory already predicts such tails, but nonlinearities can source additional tails with different amplitudes and decay laws. These nonlinear tails are interesting because they probe mode coupling in the strong-field problem and may become the dominant part of the late waveform.
+
+For Kerr, the natural equation for this calculation is the Teukolsky equation. The code evolves spin-weighted fields decomposed into spherical harmonic modes up to a chosen `l_max`, with mode-mode coupling coefficients computed from the background Kerr parameters. In the sourced calculations, the source falls as `r^{-beta}` in the far field. In the scalar self-interaction runs, the nonlinear dynamics are represented by an effective `lambda psi^2` source. The paper derives and numerically checks the far-field nonlinear-tail power law `t^{-ell-beta-s}` for spin weight `s`, harmonic mode `ell m`, and source falloff `beta`, and it also studies the dynamical formation of nonlinear tails for a massless scalar.
+
+This physics explains the shape of the GPU workload. Each right-hand-side evaluation is not just a one-dimensional stencil. It is a coupled harmonic calculation: radial derivatives are computed mode by mode, then each output harmonic is assembled from field, time-derivative, first-radial-derivative, and second-radial-derivative contributions across the coupling maps. The optional scalar nonlinearity adds another all-mode product and accumulation stage. CUDA Graph was introduced because this coupled operator is structurally fixed but launched many times during the ODE evolution.
+
 What the graph is accelerating
 ======
 
@@ -39,6 +50,11 @@ This is naturally expressed as many small kernel launches rather than one giant 
 - 1 device-to-device memcpy node for copying `dt psi`.
 
 That is 110 nodes before the nonlinear term is even included. When `lambda != 0`, the code launches a second graph with another 73 nodes to compute the cubic term. Since `boost::numeric::odeint::integrate_adaptive` invokes the RHS many times, launch overhead becomes worth optimizing.
+
+<figure>
+  <img src="/images/cuda-graph-blackholeperturbations-compute-graph.svg" alt="Schematic CUDA graph for the Teukolsky right-hand-side calculation">
+  <figcaption>Figure 1. Schematic compute graph for one right-hand-side evaluation. The implementation creates one derivative and assembly node per harmonic mode, inserts graph barriers where scratch buffers must be complete, caches executable graphs by device pointer pair, and keeps the explicitly time-dependent source outside the graph.</figcaption>
+</figure>
 
 Why CUDA Graph was a good fit
 ======
