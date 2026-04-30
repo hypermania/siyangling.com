@@ -86,7 +86,7 @@ author:
   location         : "Hong Kong"
   employer         : "City University of Hong Kong"
   pubmed           : #"https://www.ncbi.nlm.nih.gov/pubmed/?term=john+snow"
-  googlescholar    : #"http://yourfullgooglescholarurl.com"
+  googlescholar    : "https://scholar.google.com/citations?user=nG-Lri0AAAAJ&hl=en&authuser=1"
   email            : "lingsy.chris2011@gmail.com"
   researchgate     :  # example: "https://www.researchgate.net/profile/yourprofile"
   uri              :
