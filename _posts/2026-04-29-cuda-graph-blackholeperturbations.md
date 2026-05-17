@@ -19,7 +19,7 @@ Physics setting
 
 The CUDA Graph implementation discussed here supports the Teukolsky equation calculations in [arXiv:2603.20379](https://arxiv.org/abs/2603.20379) and the Schwarzschild calculations in [arXiv:2503.19967](https://arxiv.org/abs/2503.19967). The physical problem is the late-time nonlinear tail of black hole perturbation ringdown.
 
-The Teukolsky equation governs field perturbations of spin weight $s$ around a Kerr black hole. After a change of variable $\tilde\psi \equiv (\Delta^s r) \psi$ and projection onto spin-weighted spherical harmonics ${}_s Y_{\ell m}$, the equation reduces to a system of coupled 1+1D PDEs for the mode amplitudes $\tilde\psi_{\ell m}(t, r)$:
+The Teukolsky equation governs field perturbations of spin weight $s$ around a Kerr black hole. After a change of variable $\tilde\psi \equiv (\Delta^s r) \psi$ and projection onto spin-weighted spherical harmonics ${}\_s Y\_{\ell m}$, the equation reduces to a system of coupled 1+1D PDEs for the mode amplitudes $\tilde\psi\_{\ell m}(t, r)$:
 
 $$
 \partial_t^2 \tilde\psi_{\ell m} = -\sum_{\ell'm'} \left(
@@ -30,7 +30,7 @@ C_{\ell'm'\ell m} \, \tilde\psi_{\ell'm'}
 \right)
 $$
 
-The coefficients $C^{(\cdot)}_{\ell'm'\ell m}(r)$ are fixed by the Kerr parameters $M$ and $a$. Axisymmetry requires $C^{(\cdot)}_{\ell'm'\ell m} = 0$ for $m \neq m'$; for $a=0$, spherical symmetry further decouples all modes. The system is first-order reduced by promoting $\partial_t \tilde\psi_{\ell m}$ to a dynamical variable, forming the state vector $x = [\psi_{\ell m}, \partial_t \psi_{\ell m}]$.
+The coefficients $C^{(\cdot)}\_{\ell'm'\ell m}(r)$ are fixed by the Kerr parameters $M$ and $a$. Axisymmetry requires $C^{(\cdot)}\_{\ell'm'\ell m} = 0$ for $m \neq m'$; for $a=0$, spherical symmetry further decouples all modes. The system is first-order reduced by promoting $\partial_t \tilde\psi\_{\ell m}$ to a dynamical variable, forming the state vector $x = [\psi\_{\ell m}, \partial_t \psi\_{\ell m}]$.
 
 This structure fixes the shape of the GPU workload. Radial derivatives are computed per mode, then each output harmonic assembles its second time derivative from a sum of coefficient-times-field terms drawn from four coupling maps (for $\psi$, $\partial_t\psi$, $\partial_r\psi$, $\partial_r^2\psi$). The number of contributing terms varies by harmonic mode. CUDA Graph was introduced because this coupled operator is structurally fixed but launched many times during the ODE evolution.
 
@@ -150,7 +150,7 @@ In the second stage, after another barrier node, the graph multiplies `psi_sqr_l
 
 Keeping the nonlinear term in a separate graph is a sensible design choice. It keeps the linear graph simple, and it avoids paying nonlinear graph setup or launch cost when `lambda = 0`.
 
-Separating the nonlinear computation into two stages (product `phi^2` then accumulation with `lambda_coeffs`) is also algorithmically more efficient than summing all terms in a single stage. If the nonlinear terms were merged directly into the per-mode assembly, each output harmonic `(l,m)` would need terms for every pair of input modes `(l_1,m_1)` and `(l_2,m_2)` that couple to it—leading to a kernel with $O(N^3)$ terms, where $N = (l_\text{max}+1)^2$ is the number of harmonic modes. With the two-stage approach, the first stage computes each harmonic of `phi^2` with $O(N^2)$ terms (one per input pair), and the second stage accumulates the result with $O(N^2)$ terms. For $l_\text{max} = 5$, $N = 36$, and $N^3 / N^2 = 36$, so the two-stage approach eliminates a factor-of-36 blowup in the number of terms per kernel.
+Separating the nonlinear computation into two stages (product `phi^2` then accumulation with `lambda_coeffs`) is also algorithmically more efficient than summing all terms in a single stage. If the nonlinear terms were merged directly into the per-mode assembly, each output harmonic `(l,m)` would need terms for every pair of input modes `(l_1,m_1)` and `(l_2,m_2)` that couple to it—leading to a kernel with $O(N^3)$ terms, where $N = (l_\text{max}+1)^2$ is the number of harmonic modes. With the two-stage approach, the first stage computes each harmonic of `phi^2` with $O(N^2)$ terms (one per input pair), and the second stage accumulates the result with $O(N^2)$ terms. For $l\_\text{max} = 5$, $N = 36$, and $N^3 / N^2 = 36$, so the two-stage approach eliminates a factor-of-36 blowup in the number of terms per kernel.
 
 How graph reuse works
 ======
