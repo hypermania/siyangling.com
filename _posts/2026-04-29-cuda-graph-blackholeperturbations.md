@@ -161,7 +161,7 @@ The graph topology depends on where `x` and `dxdt` live in device memory, since 
 
 The solution is a pointer-keyed cache. The code extracts raw device pointers from `x` and `dxdt` and uses the pair `(x_ptr, dxdt_ptr)` as a key in `graph_exec_mapping` and `lambda_graph_exec_mapping`. If the key is new, the code builds a fresh `cudaGraph_t`, instantiates it with `cudaGraphInstantiate`, stores the resulting `cudaGraphExec_t`, and destroys the temporary graph object. If the key has been seen before, it skips reconstruction and directly calls `cudaGraphLaunch`.
 
-The consequence of this design is that new graphs are instantiated whenever a new buffer pair appears. With a 4-stage Runge-Kutta scheme such as `dopri5`, the stepper uses distinct stage buffers, so up to 4 compute graphs are instantiated on the first timestep—one for each `(x, dxdt)` pair used by the stepper. On subsequent timesteps, the stepper recycles those same buffers, and all graph launches hit the cache without further instantiation.
+The consequence of this design is that new graphs are instantiated whenever a new buffer pair appears. The `dopri5` stepper uses 8 stages per timestep, each with its own GPU memory buffers, so up to 8 compute graphs are instantiated on the first timestep—one for each `(x, dxdt)` pair used by the stepper. On subsequent timesteps, the stepper recycles those same buffers, and all graph launches hit the cache without further instantiation.
 
 What remains outside the graph
 ======
